@@ -63,14 +63,16 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                taskManager.createTask(nameOfTask, descriptionOfTask, Status.valueOf(statusOfTask));
+                Task task = taskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask, Status.valueOf(statusOfTask));
+                taskManager.createTask(task);
                 break;
             case "2":
                 System.out.println("Введите название эпика:");
                 String nameOfEpic = scanner.nextLine();
                 System.out.println("Введите описание эпика:");
                 String descriptionOfEpic = scanner.nextLine();
-                taskManager.createEpic(nameOfEpic, descriptionOfEpic);
+                Epic epic = taskManager.formulateEpicForCreation(nameOfEpic, descriptionOfEpic);
+                taskManager.createEpic(epic);
                 break;
             case "3":
                 System.out.println("Введите ID эпика, к которому относится подзадача");
@@ -85,8 +87,9 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                taskManager.createSubtask(subtaskID, nameOfSubtask, descriptionOfSubtask,
+                Subtask subtask = taskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask, descriptionOfSubtask,
                         Status.valueOf(statusOfSubtask));
+                taskManager.createSubtask(subtask);
                 break;
         }
     }
@@ -170,8 +173,6 @@ public class Main {
                         taskManager.deleteAllSubtasks();
                         break;
                     case "2":
-                        System.out.println("Введите ID эпика:");
-                        int epicID = scanner.nextInt();
                         System.out.println("Введите ID подзадачи:");
                         int subtaskID = scanner.nextInt();
                         taskManager.deleteSubtaskByID(subtaskID);
@@ -236,7 +237,9 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                taskManager.renewTask(nameOfTask, descriptionOfTask, taskID, Status.valueOf(statusOfTask));
+                Task task = taskManager.formulateTaskForRenewal(nameOfTask, descriptionOfTask, taskID,
+                        Status.valueOf(statusOfTask));
+                taskManager.renewTask(task);
                 break;
             case "2":
                 System.out.println("Введите название эпика:");
@@ -246,7 +249,8 @@ public class Main {
                 System.out.println("Введите ID эпика");
                 int epicID = scanner.nextInt();
                 scanner.nextLine();
-                taskManager.renewEpic(nameOfEpic, descriptionOfEpic, epicID);
+                Epic epic = taskManager.formulateEpicForRenewal(nameOfEpic, descriptionOfEpic, epicID);
+                taskManager.renewEpic(epic);
                 break;
             case "3":
                 System.out.println("Введите название подзадачи:");
@@ -261,8 +265,9 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                taskManager.renewSubtask(nameOfSubtask, descriptionOfSubtask, SubtaskID,
+                Subtask subtask = taskManager.formulateSubtaskForRenewal(nameOfSubtask, descriptionOfSubtask, SubtaskID,
                         Status.valueOf(statusOfSubtask));
+                taskManager.renewSubtask(subtask);
                 break;
         }
     }

@@ -1,10 +1,10 @@
 import java.util.Objects;
 
 public class Task {
-    String name;
-    String description;
-    int id;
-    Status status;
+    public String name;
+    public String description;
+    public int id;
+    public Status status;
 
     Task(String name, String description, int id, Status status) {
         this.name = name;
@@ -19,15 +19,12 @@ public class Task {
         if (obj == null) return false;
         if (this.getClass() != obj.getClass()) return false;
         Task otherTask = (Task) obj;
-        return Objects.equals(name, otherTask.name) &&
-                Objects.equals(description, otherTask.description) &&
-                Objects.equals(status, otherTask.status) &&
-                (id == otherTask.id);
+        return id == otherTask.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, id, status);
+        return Objects.hash(id);
     }
 
     @Override
