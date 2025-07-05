@@ -1,15 +1,23 @@
 import java.util.Objects;
 
 public class Task {
-    public String name;
-    public String description;
-    public int id;
-    public Status status;
+    protected String name;
+    protected String description;
+    protected int id;
+    protected Status status;
 
     Task(String name, String description, int id, Status status) {
         this.name = name;
         this.description = description;
         this.id = id;
+        this.status = status;
+    }
+
+    Task(String name, String description, Status status) {
+        this.name = name;
+        this.description = description;
+        TaskManager.setIdCounter(TaskManager.getIdCounter() + 1);
+        this.id = TaskManager.getIdCounter();
         this.status = status;
     }
 
@@ -34,5 +42,21 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", id=" + id + '\'' +
                 ", status=" + status + '}';
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
