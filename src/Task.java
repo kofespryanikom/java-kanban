@@ -6,14 +6,14 @@ public class Task {
     protected int id;
     protected Status status;
 
-    Task(String name, String description, int id, Status status) {
+    public Task(String name, String description, int id, Status status) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.status = status;
     }
 
-    Task(String name, String description, Status status) {
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         TaskManager.setIdCounter(TaskManager.getIdCounter() + 1);
