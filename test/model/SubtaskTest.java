@@ -1,7 +1,11 @@
+package model;
+
+import manager.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class SubtaskTest {
+
     @Test
     public void subtasksShouldBeEqualIfID() {
         Subtask subtask1 = new Subtask(2,"Task1", "Description1", 1, Status.NEW);

@@ -1,25 +1,30 @@
-import java.util.HashMap;
+package model;
+
+import manager.Status;
+
+import java.util.ArrayList;
 
 public class Epic extends Task {
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+
+    private final ArrayList<Integer> subtasks = new ArrayList<>();
 
     public Epic(String name, String description, int id) {
         super(name, description, id, Status.NEW);
     }
 
-    public void addSubtask(int id, Subtask subtask) {
-        subtasks.put(id, subtask);
+    public void addSubtask(int id) {
+        subtasks.add(id);
     }
 
     public void clearAllSubtasks() {
         subtasks.clear();
     }
 
-    public void deleteSubtask(int id) {
+    public void deleteSubtask(Integer id) {
         subtasks.remove(id);
     }
 
-    public HashMap<Integer, Subtask> getSubtasks() {
+    public ArrayList<Integer> getSubtasks() {
         return subtasks;
     }
 }

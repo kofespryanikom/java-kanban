@@ -1,3 +1,8 @@
+package manager;
+
+import model.Epic;
+import model.Subtask;
+import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -5,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 class ManagersTest {
-    TaskManager taskManager;
-    HistoryManager historyManager = Managers.getDefaultHistory();
+
+    private TaskManager taskManager;
+    private HistoryManager historyManager = Managers.getDefaultHistory();
 
     @BeforeEach
     public void managersCreations() {
@@ -104,7 +110,7 @@ class ManagersTest {
         Subtask secondSubtaskReturn = taskManager.returnSubtaskByID(2);
 
         ArrayList<Task> taskHistory = taskManager.getHistory();
-        Assertions.assertEquals(firstSubtaskReturn.getName(), taskHistory.get(0).getName());
+        Assertions.assertEquals(firstTaskReturn.getName(), taskHistory.get(0).getName());
         Assertions.assertEquals(firstEpicReturn.getName(), taskHistory.get(1).getName());
         Assertions.assertEquals(firstSubtaskReturn.getName(), taskHistory.get(2).getName());
         Assertions.assertEquals(secondTaskReturn.getName(), taskHistory.get(3).getName());

@@ -1,7 +1,14 @@
+package manager;
+
+import model.Epic;
+import model.Subtask;
+import model.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
+
     private int idCounter;
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
@@ -100,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createSubtask(Subtask subtask) {
         Epic epic = epics.get(subtask.getEpicID());
-        epic.addSubtask(subtask.getId(), subtask);
+        epic.addSubtask(subtask.getId());
         subtasks.put(subtask.getId(), subtask);
         if (subtask.getStatus().equals(Status.IN_PROGRESS)) {
             epic.setStatus(Status.IN_PROGRESS);
@@ -129,7 +136,7 @@ public class InMemoryTaskManager implements TaskManager {
         int epicID = subtask.getEpicID();
         if (subtasks.containsKey(subtask.getId())) {
             subtasks.put(subtask.getId(), subtask);
-            epics.get(epicID).addSubtask(subtask.getId(), subtask);
+            epics.get(epicID).addSubtask(subtask.getId());
             epics.get(epicID).setStatus(checkStatus(epics.get(epicID).getId()));
         }
     }
