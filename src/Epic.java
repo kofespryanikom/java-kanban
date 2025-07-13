@@ -6,9 +6,6 @@ public class Epic extends Task {
     public Epic(String name, String description, int id) {
         super(name, description, id, Status.NEW);
     }
-    public Epic(String name, String description) {
-        super(name, description, Status.NEW);
-    }
 
     public void addSubtask(int id, Subtask subtask) {
         subtasks.put(id, subtask);
@@ -22,4 +19,7 @@ public class Epic extends Task {
         subtasks.remove(id);
     }
 
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return subtasks;
+    }
 }

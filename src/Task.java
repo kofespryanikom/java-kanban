@@ -13,14 +13,6 @@ public class Task {
         this.status = status;
     }
 
-    public Task(String name, String description, Status status) {
-        this.name = name;
-        this.description = description;
-        TaskManager.setIdCounter(TaskManager.getIdCounter() + 1);
-        this.id = TaskManager.getIdCounter();
-        this.status = status;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -44,16 +36,20 @@ public class Task {
                 ", status=" + status + '}';
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public int getId() {
         return id;
     }
 
     public Status getStatus() {
         return status;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void setStatus(Status status) {
