@@ -1,6 +1,6 @@
 package manager;
 
-import data_structures.Node;
+import datastructures.Node;
 import model.Epic;
 import model.Subtask;
 import model.Task;
