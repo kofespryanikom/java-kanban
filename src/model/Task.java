@@ -18,6 +18,13 @@ public class Task {
         this.status = status;
     }
 
+    public Task(Task task) {
+        this.name = task.getName();
+        this.description = task.getDescription();
+        this.id = task.getId();
+        this.status = task.getStatus();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
