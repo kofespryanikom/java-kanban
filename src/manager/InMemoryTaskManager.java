@@ -1,11 +1,10 @@
 package manager;
 
-import dataStructures.Node;
+import data_structures.Node;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

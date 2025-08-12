@@ -1,6 +1,6 @@
 package manager;
 
-import dataStructures.Node;
+import data_structures.Node;
 import model.Task;
 
 import java.util.List;

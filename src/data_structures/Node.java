@@ -1,4 +1,4 @@
-package dataStructures;
+package data_structures;
 
 public class Node<E> {
     private E data;
