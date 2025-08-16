@@ -3,13 +3,19 @@ package model;
 import manager.Status;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
 
-    private final ArrayList<Integer> subtasks = new ArrayList<>();
+    private List<Integer> subtasks = new ArrayList<>();
 
     public Epic(String name, String description, int id) {
         super(name, description, id, Status.NEW);
+    }
+
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), epic.getId(), epic.getStatus());
+        subtasks = epic.getSubtasks();
     }
 
     public void addSubtask(int id) {
@@ -24,7 +30,7 @@ public class Epic extends Task {
         subtasks.remove(id);
     }
 
-    public ArrayList<Integer> getSubtasks() {
+    public List<Integer> getSubtasks() {
         return subtasks;
     }
 }

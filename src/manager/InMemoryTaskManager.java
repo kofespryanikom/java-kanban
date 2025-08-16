@@ -1,18 +1,21 @@
 package manager;
 
+import datastructures.Node;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
 
     private int idCounter;
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
 
     public InMemoryTaskManager() {
@@ -58,17 +61,20 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
+        deleteAllTasksFromHistory();
         tasks.clear();
     }
 
     @Override
     public void deleteAllEpics() {
+        deleteAllEpicsFromHistory();
         subtasks.clear();
         epics.clear();
     }
 
     @Override
     public void deleteAllSubtasks() {
+        deleteAllSubtasksFromHistory();
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.clearAllSubtasks();
@@ -143,21 +149,30 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskByID(int id) {
+        inMemoryHistoryManager.removeNode(inMemoryHistoryManager.getNodeMap().get(id));
         tasks.remove(id);
     }
 
     @Override
     public void deleteEpicByID(int id) {
+        List<Integer> subtasksIDToRemove = new ArrayList<>();
+
+        inMemoryHistoryManager.removeNode(inMemoryHistoryManager.getNodeMap().get(id));
+        deleteAllSubtasksOfEpicFromHistory(epics.get(id));
         for (int subtaskID : subtasks.keySet()) {
             if (subtasks.get(subtaskID).getEpicID() == id) {
-                subtasks.remove(subtaskID);
+                subtasksIDToRemove.add(subtaskID);
             }
+        }
+        for (int subtaskID : subtasksIDToRemove) {
+            subtasks.remove(subtaskID);
         }
         epics.remove(id);
     }
 
     @Override
     public void deleteSubtaskByID(int subtaskID) {
+        inMemoryHistoryManager.removeNode(inMemoryHistoryManager.getNodeMap().get(subtaskID));
         int epicID = subtasks.get(subtaskID).getEpicID();
         Epic epic = epics.get(epicID);
         if (subtasks.containsKey(subtaskID)) {
@@ -171,7 +186,6 @@ public class InMemoryTaskManager implements TaskManager {
     public Status checkStatus(int epicID) {
         int newTasksCounter = 0;
         int doneTasksCounter = 0;
-        Epic epic = epics.get(epicID);
         for (Subtask subtaskCheck : subtasks.values()) {
 
             if (subtaskCheck.getEpicID() == epicID) {
@@ -213,7 +227,52 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
-        return inMemoryHistoryManager.getHistory();
+    public List<Task> getHistory() {
+        return inMemoryHistoryManager.getTasks();
+    }
+
+    public void deleteAllTasksFromHistory() {
+        List<Node<Task>> nodesToDelete = new ArrayList<>();
+        for (Map.Entry<Integer, Node<Task>> entry : inMemoryHistoryManager.getNodeMap().entrySet()) {
+            if (tasks.containsKey(entry.getKey())) {
+                nodesToDelete.add(entry.getValue());
+            }
+        }
+        for (Node<Task> node : nodesToDelete) {
+            inMemoryHistoryManager.removeNode(node);
+        }
+    }
+
+    public void deleteAllEpicsFromHistory() {
+        List<Node<Task>> epicNodesToDelete = new ArrayList<>();
+        for (Map.Entry<Integer, Node<Task>> entry : inMemoryHistoryManager.getNodeMap().entrySet()) {
+            if (epics.containsKey(entry.getKey())) {
+                epicNodesToDelete.add(entry.getValue());
+            }
+        }
+        for (Node<Task> node : epicNodesToDelete) {
+            inMemoryHistoryManager.removeNode(node);
+            if (node.getData() instanceof Epic) {
+                deleteAllSubtasksOfEpicFromHistory((Epic) node.getData());
+            }
+        }
+    }
+
+    public void deleteAllSubtasksFromHistory() {
+        List<Node<Task>> subtaskNodesToDelete = new ArrayList<>();
+        for (Map.Entry<Integer, Node<Task>> entry : inMemoryHistoryManager.getNodeMap().entrySet()) {
+            if (subtasks.containsKey(entry.getKey())) {
+                subtaskNodesToDelete.add(entry.getValue());
+            }
+        }
+        for (Node<Task> node : subtaskNodesToDelete) {
+            inMemoryHistoryManager.removeNode(node);
+        }
+    }
+
+    public void deleteAllSubtasksOfEpicFromHistory(Epic epic) {
+        for (Integer subtaskID : epic.getSubtasks()) {
+            inMemoryHistoryManager.removeNode(inMemoryHistoryManager.getNodeMap().get(subtaskID));
+        }
     }
 }

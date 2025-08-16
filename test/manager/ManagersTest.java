@@ -7,16 +7,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
+import java.util.List;
 
 class ManagersTest {
 
     private TaskManager taskManager;
-    private HistoryManager historyManager = Managers.getDefaultHistory();
+    private HistoryManager historyManager;
 
     @BeforeEach
     public void managersCreations() {
         taskManager = Managers.getDefault();
+        historyManager = Managers.getDefaultHistory();
     }
 
     @Test
@@ -91,30 +92,78 @@ class ManagersTest {
         taskManager.createTask(taskManager.formulateTaskForCreation("Task1", "Description1",
                 Status.NEW));
         taskManager.createEpic(taskManager.formulateEpicForCreation("Epic1", "Description1"));
-        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Task1",
+        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Subtask1",
                 "Description1", Status.NEW));
 
         Task firstTaskReturn = taskManager.returnTaskByID(0);
         Epic firstEpicReturn = taskManager.returnEpicByID(1);
         Subtask firstSubtaskReturn = taskManager.returnSubtaskByID(2);
 
-        taskManager.createTask(taskManager.formulateTaskForCreation("Task1Renewed",
-                "Description1Renewed", Status.IN_PROGRESS));
-        taskManager.createEpic(taskManager.formulateEpicForCreation("Epic1Renewed",
-                "Description1Renewed"));
-        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Task1Renewed",
-                "Renewed", Status.IN_PROGRESS));
+        taskManager.renewTask(new Task( "Task1Renewed",
+                "Description1Renewed", 0, Status.IN_PROGRESS));
+        taskManager.renewEpic(new Epic("Epic1Renewed", "Description1Renewed", 1));
+        taskManager.renewSubtask(new Subtask(1 ,"Task1Renewed", "Renewed",
+                2, Status.IN_PROGRESS));
 
-        Task secondTaskReturn = taskManager.returnTaskByID(0);
-        Epic secondEpicReturn = taskManager.returnEpicByID(1);
-        Subtask secondSubtaskReturn = taskManager.returnSubtaskByID(2);
+        List<Task> taskHistory = taskManager.getHistory();
 
-        ArrayList<Task> taskHistory = taskManager.getHistory();
-        Assertions.assertEquals(firstTaskReturn.getName(), taskHistory.get(0).getName());
+        Assertions.assertEquals(firstTaskReturn.getName(), taskHistory.get(2).getName());
         Assertions.assertEquals(firstEpicReturn.getName(), taskHistory.get(1).getName());
-        Assertions.assertEquals(firstSubtaskReturn.getName(), taskHistory.get(2).getName());
-        Assertions.assertEquals(secondTaskReturn.getName(), taskHistory.get(3).getName());
-        Assertions.assertEquals(secondEpicReturn.getName(), taskHistory.get(4).getName());
-        Assertions.assertEquals(secondSubtaskReturn.getName(), taskHistory.get(5).getName());
+        Assertions.assertEquals(firstSubtaskReturn.getName(), taskHistory.get(0).getName());
+    }
+
+    @Test
+    public void historyManagerShouldReturnCorrectListAfterAdditionOfTasksAndRemoval() {
+
+        Task task = taskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
+        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask = taskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
+                Status.NEW);
+
+        historyManager.add(subtask);
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+
+        List<Task> correctListAfterAddition = List.of(subtask, epic, task);
+
+        Assertions.assertEquals(correctListAfterAddition, historyManager.getTasks());
+
+        historyManager.removeNode(historyManager.getNodeMap().get(task.getId()));
+
+        List<Task> correctListAfterRemoval = List.of(subtask, epic);
+
+        Assertions.assertEquals(correctListAfterRemoval, historyManager.getTasks());
+    }
+
+    @Test
+    public void taskManagerShouldDeleteSubtasksFromEpicsThatAreNotUsed() {
+        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask1 = taskManager.formulateSubtaskForCreation(0,"Subtask1", "Description1",
+                Status.NEW);
+        Subtask subtask2 = taskManager.formulateSubtaskForCreation(0,"Subtask2", "Description2",
+                Status.NEW);
+        taskManager.createEpic(epic);
+        taskManager.createSubtask(subtask1);
+        taskManager.createSubtask(subtask2);
+        taskManager.deleteSubtaskByID(1);
+        Epic epicReturned = taskManager.returnEpicByID(0);
+
+        Assertions.assertFalse(epicReturned.getSubtasks().contains(subtask1.getId()));
+    }
+
+    @Test
+    public void tasksFieldsCanBeEditedViaSettersAndGetters() {
+        Task task = taskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
+        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask = taskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
+                Status.NEW);
+
+        task.setStatus(Status.IN_PROGRESS);
+        Assertions.assertNotEquals(Status.NEW, task.getStatus());
+
+        epic.addSubtask(subtask.getId());
+        epic.getSubtasks().add(1);
+        Assertions.assertNotEquals(List.of(2), epic.getSubtasks());
     }
 }

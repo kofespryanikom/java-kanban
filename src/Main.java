@@ -6,6 +6,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -282,7 +283,7 @@ public class Main {
     }
 
     public static void getHistory() {
-        ArrayList<Task> history = inMemoryTaskManager.getHistory();
+        List<Task> history = inMemoryTaskManager.getHistory();
         System.out.println(history);
     }
 }
