@@ -1,6 +1,7 @@
 package model;
 
 import manager.Status;
+import manager.TaskTypes;
 
 import java.util.Objects;
 
@@ -10,12 +11,14 @@ public class Task {
     protected String name;
     protected String description;
     protected Status status;
+    protected TaskTypes className;
 
     public Task(String name, String description, int id, Status status) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.status = status;
+        className = TaskTypes.TASK;
     }
 
     public Task(Task task) {
@@ -23,6 +26,7 @@ public class Task {
         this.description = task.getDescription();
         this.id = task.getId();
         this.status = task.getStatus();
+        className = TaskTypes.TASK;
     }
 
     @Override
@@ -41,11 +45,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", id=" + id + '\'' +
-                ", status=" + status + '}';
+        return id + ","
+                + className + ","
+                + name + ","
+                + status + ","
+                + description;
     }
 
     public String getName() {

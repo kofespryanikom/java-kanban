@@ -7,66 +7,71 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 class ManagersTest {
 
-    private TaskManager taskManager;
+    private TaskManager inMemoryTaskManager;
     private HistoryManager historyManager;
 
     @BeforeEach
     public void managersCreations() {
-        taskManager = Managers.getDefault();
+        inMemoryTaskManager = Managers.getDefault();
         historyManager = Managers.getDefaultHistory();
     }
 
     @Test
     public void managerShouldReturnWorkingTaskManager() {
-        Assertions.assertTrue(taskManager instanceof InMemoryTaskManager);
+        Assertions.assertTrue(inMemoryTaskManager instanceof InMemoryTaskManager);
         Assertions.assertTrue(historyManager instanceof InMemoryHistoryManager);
     }
 
     @Test
     public void managerShouldBeAbleAddCorrectTaskTypesAndFindTasksByID() {
 
-        taskManager.createTask(taskManager.formulateTaskForCreation("Task1", "Description1",
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1",
                 Status.NEW));
-        taskManager.createEpic(taskManager.formulateEpicForCreation("Epic1", "Description1"));
-        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Task1",
+        inMemoryTaskManager.createEpic(inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1"));
+        inMemoryTaskManager.createSubtask(inMemoryTaskManager.formulateSubtaskForCreation(1,"Task1",
                 "Description1", Status.NEW));
 
-        Assertions.assertTrue(taskManager.returnTaskByID(0) instanceof Task);
-        Assertions.assertTrue(taskManager.returnEpicByID(1) instanceof Epic);
-        Assertions.assertTrue(taskManager.returnSubtaskByID(2) instanceof Subtask);
+        Assertions.assertTrue(inMemoryTaskManager.returnTaskByID(0) instanceof Task);
+        Assertions.assertTrue(inMemoryTaskManager.returnEpicByID(1) instanceof Epic);
+        Assertions.assertTrue(inMemoryTaskManager.returnSubtaskByID(2) instanceof Subtask);
     }
 
     @Test
     public void managerShouldGenerateSameIDasMeant() {
-        taskManager.createTask(taskManager.formulateTaskForCreation("Task1", "Description1",
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1",
                 Status.NEW));
-        Assertions.assertEquals(0, taskManager.getIdCounter());
-        taskManager.createEpic(taskManager.formulateEpicForCreation("Epic1", "Description1"));
-        Assertions.assertEquals(1, taskManager.getIdCounter());
-        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Task1",
+        Assertions.assertEquals(0, inMemoryTaskManager.getIdCounter());
+        inMemoryTaskManager.createEpic(inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1"));
+        Assertions.assertEquals(1, inMemoryTaskManager.getIdCounter());
+        inMemoryTaskManager.createSubtask(inMemoryTaskManager.formulateSubtaskForCreation(1,"Task1",
                 "Description1", Status.NEW));
-        Assertions.assertEquals(2, taskManager.getIdCounter());
+        Assertions.assertEquals(2, inMemoryTaskManager.getIdCounter());
     }
 
     @Test
     public void taskPassedAndTaskReturnedShouldBeEqual() {
-        Task taskBeforePassing = taskManager.formulateTaskForCreation("Task1", "Description1",
+        Task taskBeforePassing = inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1",
                 Status.NEW);
-        Epic epicBeforePassing = taskManager.formulateEpicForCreation("Epic1", "Description1");
-        Subtask subtaskBeforePassing = taskManager.formulateSubtaskForCreation(1,"Task1",
+        Epic epicBeforePassing = inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtaskBeforePassing = inMemoryTaskManager.formulateSubtaskForCreation(1,"Task1",
                 "Description1", Status.NEW);
 
-        taskManager.createTask(taskBeforePassing);
-        taskManager.createEpic(epicBeforePassing);
-        taskManager.createSubtask(subtaskBeforePassing);
+        inMemoryTaskManager.createTask(taskBeforePassing);
+        inMemoryTaskManager.createEpic(epicBeforePassing);
+        inMemoryTaskManager.createSubtask(subtaskBeforePassing);
 
-        Task taskAfterPassing = taskManager.returnTaskByID(0);
-        Epic epicAfterPassing = taskManager.returnEpicByID(1);
-        Subtask subtaskAfterPassing = taskManager.returnSubtaskByID(2);
+        Task taskAfterPassing = inMemoryTaskManager.returnTaskByID(0);
+        Epic epicAfterPassing = inMemoryTaskManager.returnEpicByID(1);
+        Subtask subtaskAfterPassing = inMemoryTaskManager.returnSubtaskByID(2);
 
         Assertions.assertEquals(taskBeforePassing.getName(), taskAfterPassing.getName());
         Assertions.assertEquals(taskBeforePassing.getDescription(), taskAfterPassing.getDescription());
@@ -89,23 +94,23 @@ class ManagersTest {
     @Test
     public void historyManagerShouldSavePreviousTaskStates() {
 
-        taskManager.createTask(taskManager.formulateTaskForCreation("Task1", "Description1",
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1",
                 Status.NEW));
-        taskManager.createEpic(taskManager.formulateEpicForCreation("Epic1", "Description1"));
-        taskManager.createSubtask(taskManager.formulateSubtaskForCreation(1,"Subtask1",
+        inMemoryTaskManager.createEpic(inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1"));
+        inMemoryTaskManager.createSubtask(inMemoryTaskManager.formulateSubtaskForCreation(1,"Subtask1",
                 "Description1", Status.NEW));
 
-        Task firstTaskReturn = taskManager.returnTaskByID(0);
-        Epic firstEpicReturn = taskManager.returnEpicByID(1);
-        Subtask firstSubtaskReturn = taskManager.returnSubtaskByID(2);
+        Task firstTaskReturn = inMemoryTaskManager.returnTaskByID(0);
+        Epic firstEpicReturn = inMemoryTaskManager.returnEpicByID(1);
+        Subtask firstSubtaskReturn = inMemoryTaskManager.returnSubtaskByID(2);
 
-        taskManager.renewTask(new Task( "Task1Renewed",
+        inMemoryTaskManager.renewTask(new Task( "Task1Renewed",
                 "Description1Renewed", 0, Status.IN_PROGRESS));
-        taskManager.renewEpic(new Epic("Epic1Renewed", "Description1Renewed", 1));
-        taskManager.renewSubtask(new Subtask(1 ,"Task1Renewed", "Renewed",
+        inMemoryTaskManager.renewEpic(new Epic("Epic1Renewed", "Description1Renewed", 1));
+        inMemoryTaskManager.renewSubtask(new Subtask(1 ,"Task1Renewed", "Renewed",
                 2, Status.IN_PROGRESS));
 
-        List<Task> taskHistory = taskManager.getHistory();
+        List<Task> taskHistory = inMemoryTaskManager.getHistory();
 
         Assertions.assertEquals(firstTaskReturn.getName(), taskHistory.get(2).getName());
         Assertions.assertEquals(firstEpicReturn.getName(), taskHistory.get(1).getName());
@@ -115,9 +120,9 @@ class ManagersTest {
     @Test
     public void historyManagerShouldReturnCorrectListAfterAdditionOfTasksAndRemoval() {
 
-        Task task = taskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
-        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
-        Subtask subtask = taskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
+        Task task = inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
+        Epic epic = inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask = inMemoryTaskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
                 Status.NEW);
 
         historyManager.add(subtask);
@@ -138,25 +143,25 @@ class ManagersTest {
 
     @Test
     public void taskManagerShouldDeleteSubtasksFromEpicsThatAreNotUsed() {
-        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
-        Subtask subtask1 = taskManager.formulateSubtaskForCreation(0,"Subtask1", "Description1",
+        Epic epic = inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask1 = inMemoryTaskManager.formulateSubtaskForCreation(0,"Subtask1", "Description1",
                 Status.NEW);
-        Subtask subtask2 = taskManager.formulateSubtaskForCreation(0,"Subtask2", "Description2",
+        Subtask subtask2 = inMemoryTaskManager.formulateSubtaskForCreation(0,"Subtask2", "Description2",
                 Status.NEW);
-        taskManager.createEpic(epic);
-        taskManager.createSubtask(subtask1);
-        taskManager.createSubtask(subtask2);
-        taskManager.deleteSubtaskByID(1);
-        Epic epicReturned = taskManager.returnEpicByID(0);
+        inMemoryTaskManager.createEpic(epic);
+        inMemoryTaskManager.createSubtask(subtask1);
+        inMemoryTaskManager.createSubtask(subtask2);
+        inMemoryTaskManager.deleteSubtaskByID(1);
+        Epic epicReturned = inMemoryTaskManager.returnEpicByID(0);
 
         Assertions.assertFalse(epicReturned.getSubtasks().contains(subtask1.getId()));
     }
 
     @Test
     public void tasksFieldsCanBeEditedViaSettersAndGetters() {
-        Task task = taskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
-        Epic epic = taskManager.formulateEpicForCreation("Epic1", "Description1");
-        Subtask subtask = taskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
+        Task task = inMemoryTaskManager.formulateTaskForCreation("Task1", "Description1", Status.NEW);
+        Epic epic = inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1");
+        Subtask subtask = inMemoryTaskManager.formulateSubtaskForCreation(1,"Subtask1", "Description1",
                 Status.NEW);
 
         task.setStatus(Status.IN_PROGRESS);
@@ -165,5 +170,85 @@ class ManagersTest {
         epic.addSubtask(subtask.getId());
         epic.getSubtasks().add(1);
         Assertions.assertNotEquals(List.of(2), epic.getSubtasks());
+    }
+
+    @Test
+    public void backedTaskManagerShouldCreateBlankFileIfSaveMethodWasCalled() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        FileBackedTaskManager backedTaskManager = Managers.getBackedTaskManager(backingFile.toString());
+
+        backedTaskManager.save();
+
+        Assertions.assertEquals("id,type,name,status,description,epic\n",
+                Files.readString(backingFile.toPath()));
+    }
+
+    @Test
+    public void backedTaskManagerShouldRecoverNoTasksFromBlankFile() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
+            bufferedWriter.write("id,type,name,status,description,epic\n");
+        }
+        FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
+        List<Task> recoveredTaskList = recoveredBackedTaskManager.returnTasksList();
+        List<Epic> recoveredEpicList = recoveredBackedTaskManager.returnEpicsList();
+        List<Subtask> recoveredSubtaskList = recoveredBackedTaskManager.returnSubtasksList();
+
+        Assertions.assertEquals(List.of(), recoveredTaskList);
+        Assertions.assertEquals(List.of(), recoveredEpicList);
+        Assertions.assertEquals(List.of(), recoveredSubtaskList);
+    }
+
+    @Test
+    public void backedTaskManagerShouldCreateRecoverFileIfSaveMethodWasCalled() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        FileBackedTaskManager backedTaskManager = Managers.getBackedTaskManager(backingFile.toString());
+
+        backedTaskManager.createTask(backedTaskManager.formulateTaskForCreation("Task1", "Description1",
+                Status.NEW));
+        backedTaskManager.createEpic(backedTaskManager.formulateEpicForCreation("Epic1", "Description1"));
+        backedTaskManager.createSubtask(backedTaskManager.formulateSubtaskForCreation(1,"Task1",
+                "Description1", Status.NEW));
+        backedTaskManager.save();
+
+        Assertions.assertEquals("id,type,name,status,description,epic\n"
+                + backedTaskManager.returnTaskByID(0).toString() + "\n"
+                + backedTaskManager.returnEpicByID(1).toString() + "\n"
+                + backedTaskManager.returnSubtaskByID(2).toString() + "\n", Files.readString(backingFile.toPath()));
+    }
+
+    @Test
+    public void backedTaskManagerShouldRecoverTasksFromFile() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
+            bufferedWriter.write("id,type,name,status,description,epic\n" +
+                    "0,TASK,0,NEW,0\n" +
+                    "1,EPIC,1,DONE,1\n" +
+                    "2,SUBTASK,2,DONE,2,1\n");
+        }
+        FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
+        List<Task> recoveredTaskList = recoveredBackedTaskManager.returnTasksList();
+        List<Epic> recoveredEpicList = recoveredBackedTaskManager.returnEpicsList();
+        List<Subtask> recoveredSubtaskList = recoveredBackedTaskManager.returnSubtasksList();
+
+        Assertions.assertEquals("[0,TASK,0,NEW,0]", recoveredTaskList.toString());
+        Assertions.assertEquals("[1,EPIC,1,DONE,1]", recoveredEpicList.toString());
+        Assertions.assertEquals("[2,SUBTASK,2,DONE,2,1]", recoveredSubtaskList.toString());
+    }
+
+    @Test
+    public void epicSubtasksMapShouldBeRecoveredFromFile() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
+            bufferedWriter.write("id,type,name,status,description,epic\n" +
+                    "1,EPIC,1,DONE,1\n" +
+                    "2,SUBTASK,2,DONE,2,1\n" +
+                    "3,SUBTASK,3,DONE,3,1\n");
+        }
+        FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
+        Epic recoveredEpic = recoveredBackedTaskManager.returnEpicByID(1);
+
+        Assertions.assertEquals("[2, 3]",
+                recoveredEpic.getSubtasks().toString());
     }
 }
