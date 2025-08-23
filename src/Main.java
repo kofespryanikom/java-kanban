@@ -12,8 +12,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    static Scanner scanner = new Scanner(System.in);
-    static TaskManager taskManager;
+    private static Scanner scanner = new Scanner(System.in);
+    private static TaskManager taskManager;
 
     public static void main(String[] args) throws IOException {
 
@@ -133,6 +133,8 @@ public class Main {
                         descriptionOfSubtask, Status.valueOf(statusOfSubtask));
                 taskManager.createSubtask(subtask);
                 break;
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 
@@ -223,6 +225,8 @@ public class Main {
                     default:
                         System.out.println("Такой команды нет!");
                 }
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 
@@ -308,6 +312,8 @@ public class Main {
                 taskManager.renewSubtask(new Subtask(taskManager.getEpicIdBySubtaskId(subtaskID),
                         nameOfSubtask, descriptionOfSubtask, subtaskID, Status.valueOf(statusOfSubtask)));
                 break;
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 

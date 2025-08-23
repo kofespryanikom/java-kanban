@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
 
-    static String savedTasksFilePath;
+    private static String savedTasksFilePath;
 
     public FileBackedTaskManager(String savedTasksFilePath) {
         FileBackedTaskManager.savedTasksFilePath = savedTasksFilePath;
