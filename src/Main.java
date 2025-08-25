@@ -1,20 +1,23 @@
-import manager.Status;
 import manager.Managers;
+import manager.Status;
 import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    static Scanner scanner = new Scanner(System.in);
-    static TaskManager inMemoryTaskManager = Managers.getDefault();
+    private static Scanner scanner = new Scanner(System.in);
+    private static TaskManager taskManager;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+
+        printManagerChoice();
 
         while (true) {
             printMenu();
@@ -47,6 +50,32 @@ public class Main {
         }
     }
 
+    public static void printManagerChoice() throws IOException {
+        System.out.println("Выберите менеджер:");
+        System.out.println("1 - InMemoryTaskManager");
+        System.out.println("2 - FileBackedTaskManager");
+        System.out.println("3 - Восстановленный FileBackedTaskManager");
+        String command = scanner.nextLine();
+
+        switch (command) {
+            case "1":
+                taskManager = Managers.getDefault();
+                break;
+            case "2":
+                System.out.println("Укажите путь файла, куда будет сохраняться бэкап:");
+                String filePathForSaving = scanner.nextLine();
+                taskManager = Managers.getBackedTaskManager(filePathForSaving);
+                break;
+            case "3":
+                System.out.println("Укажите путь файла, из которого будет происходить бэкап:");
+                String filePathForBacking = scanner.nextLine();
+                taskManager = Managers.getRecoveredBackedManager(filePathForBacking);
+                break;
+            default:
+                System.out.println("Такого менеджера нет!");
+        }
+    }
+
     public static void printMenu() {
         System.out.println("Выберите команду:");
         System.out.println("1 - Создать задачу/эпик/подзадачу");
@@ -75,17 +104,17 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                Task task = inMemoryTaskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask,
+                Task task = taskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask,
                         Status.valueOf(statusOfTask));
-                inMemoryTaskManager.createTask(task);
+                taskManager.createTask(task);
                 break;
             case "2":
                 System.out.println("Введите название эпика:");
                 String nameOfEpic = scanner.nextLine();
                 System.out.println("Введите описание эпика:");
                 String descriptionOfEpic = scanner.nextLine();
-                Epic epic = inMemoryTaskManager.formulateEpicForCreation(nameOfEpic, descriptionOfEpic);
-                inMemoryTaskManager.createEpic(epic);
+                Epic epic = taskManager.formulateEpicForCreation(nameOfEpic, descriptionOfEpic);
+                taskManager.createEpic(epic);
                 break;
             case "3":
                 System.out.println("Введите ID эпика, к которому относится подзадача");
@@ -100,10 +129,12 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                Subtask subtask = inMemoryTaskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask,
+                Subtask subtask = taskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask,
                         descriptionOfSubtask, Status.valueOf(statusOfSubtask));
-                inMemoryTaskManager.createSubtask(subtask);
+                taskManager.createSubtask(subtask);
                 break;
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 
@@ -115,15 +146,15 @@ public class Main {
         String command = scanner.nextLine();
         switch (command) {
             case "1":
-                ArrayList<Task> taskList = inMemoryTaskManager.returnTasksList();
+                ArrayList<Task> taskList = taskManager.returnTasksList();
                 System.out.println(taskList);
                 break;
             case "2":
-                ArrayList<Epic> epicList = inMemoryTaskManager.returnEpicsList();
+                ArrayList<Epic> epicList = taskManager.returnEpicsList();
                 System.out.println(epicList);
                 break;
             case "3":
-                ArrayList<Subtask> subtaskList = inMemoryTaskManager.returnSubtasksList();
+                ArrayList<Subtask> subtaskList = taskManager.returnSubtasksList();
                 System.out.println(subtaskList);
                 break;
             default:
@@ -145,12 +176,12 @@ public class Main {
                 command = scanner.nextLine();
                 switch (command) {
                     case "1":
-                        inMemoryTaskManager.deleteAllTasks();
+                        taskManager.deleteAllTasks();
                         break;
                     case "2":
                         System.out.println("Введите ID задачи");
                         int taskID = scanner.nextInt();
-                        inMemoryTaskManager.deleteTaskByID(taskID);
+                        taskManager.deleteTaskByID(taskID);
                         scanner.nextLine();
                         break;
                     default:
@@ -164,12 +195,12 @@ public class Main {
                 command = scanner.nextLine();
                 switch (command) {
                     case "1":
-                        inMemoryTaskManager.deleteAllEpics();
+                        taskManager.deleteAllEpics();
                         break;
                     case "2":
                         System.out.println("Введите ID эпика");
                         int epicID = scanner.nextInt();
-                        inMemoryTaskManager.deleteEpicByID(epicID);
+                        taskManager.deleteEpicByID(epicID);
                         scanner.nextLine();
                         break;
                     default:
@@ -183,17 +214,19 @@ public class Main {
                 command = scanner.nextLine();
                 switch (command) {
                     case "1":
-                        inMemoryTaskManager.deleteAllSubtasks();
+                        taskManager.deleteAllSubtasks();
                         break;
                     case "2":
                         System.out.println("Введите ID подзадачи:");
                         int subtaskID = scanner.nextInt();
-                        inMemoryTaskManager.deleteSubtaskByID(subtaskID);
+                        taskManager.deleteSubtaskByID(subtaskID);
                         scanner.nextLine();
                         break;
                     default:
                         System.out.println("Такой команды нет!");
                 }
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 
@@ -207,21 +240,21 @@ public class Main {
             case "1":
                 System.out.println("Введите ID задачи");
                 int taskID = scanner.nextInt();
-                Task task = inMemoryTaskManager.returnTaskByID(taskID);
+                Task task = taskManager.returnTaskByID(taskID);
                 scanner.nextLine();
                 System.out.println(task);
                 break;
             case "2":
                 System.out.println("Введите ID эпика");
                 int epicID = scanner.nextInt();
-                Epic epic = inMemoryTaskManager.returnEpicByID(epicID);
+                Epic epic = taskManager.returnEpicByID(epicID);
                 scanner.nextLine();
                 System.out.println(epic);
                 break;
             case "3":
                 System.out.println("Введите ID подзадачи");
                 int subtaskID = scanner.nextInt();
-                Subtask subtask = inMemoryTaskManager.returnSubtaskByID(subtaskID);
+                Subtask subtask = taskManager.returnSubtaskByID(subtaskID);
                 scanner.nextLine();
                 System.out.println(subtask);
                 break;
@@ -250,7 +283,7 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                inMemoryTaskManager.renewTask(new Task(nameOfTask, descriptionOfTask, taskID,
+                taskManager.renewTask(new Task(nameOfTask, descriptionOfTask, taskID,
                         Status.valueOf(statusOfTask)));
                 break;
             case "2":
@@ -261,7 +294,7 @@ public class Main {
                 System.out.println("Введите ID эпика");
                 int epicID = scanner.nextInt();
                 scanner.nextLine();
-                inMemoryTaskManager.renewEpic(new Epic(nameOfEpic, descriptionOfEpic, epicID));
+                taskManager.renewEpic(new Epic(nameOfEpic, descriptionOfEpic, epicID));
                 break;
             case "3":
                 System.out.println("Введите название подзадачи:");
@@ -276,14 +309,16 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                inMemoryTaskManager.renewSubtask(new Subtask(inMemoryTaskManager.getEpicIdBySubtaskId(subtaskID),
+                taskManager.renewSubtask(new Subtask(taskManager.getEpicIdBySubtaskId(subtaskID),
                         nameOfSubtask, descriptionOfSubtask, subtaskID, Status.valueOf(statusOfSubtask)));
                 break;
+            default:
+                System.out.println("Такого типа задачи нет!");
         }
     }
 
     public static void getHistory() {
-        List<Task> history = inMemoryTaskManager.getHistory();
+        List<Task> history = taskManager.getHistory();
         System.out.println(history);
     }
 }
