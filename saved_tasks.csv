@@ -1,4 +1,4 @@
-id,type,name,status,description,epic
-0,TASK,0,NEW,0
-1,EPIC,1,DONE,1
-2,SUBTASK,2,DONE,2,1
+id,type,name,status,description,epic,duration,startTime
+0,TASK,0,DONE,0,null,70,22:30 01.01.2000
+1,EPIC,1,DONE,1,null,80,21:09 01.01.2000
+0,SUBTASK,4,DONE,4,1,80,21:09 01.01.2000

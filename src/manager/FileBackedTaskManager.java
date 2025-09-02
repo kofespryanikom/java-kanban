@@ -8,6 +8,8 @@ import model.Task;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
 
@@ -18,10 +20,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     public FileBackedTaskManager(Map<Integer, Task> backedTasksMap, Map<Integer, Epic> backedEpicsMap,
-                                 Map<Integer, Subtask> backedSubtasksMap) {
+                                 Map<Integer, Subtask> backedSubtasksMap, TreeSet<Task> prioritizedTasks,
+                                 String savedTasksFilePath) {
         tasks = backedTasksMap;
         epics = backedEpicsMap;
         subtasks = backedSubtasksMap;
+        this.prioritizedTasks = prioritizedTasks;
+        FileBackedTaskManager.savedTasksFilePath = savedTasksFilePath;
     }
 
     @Override
@@ -100,6 +105,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         Map<Integer, Task> backedTasksMap = new HashMap<>();
         Map<Integer, Epic> backedEpicsMap = new HashMap<>();
         Map<Integer, Subtask> backedSubtasksMap = new HashMap<>();
+        TreeSet<Task> backedPrioritizedTasks = new TreeSet<>((Task task1, Task task2) -> {
+            if (task1.getStartTime().isBefore(task2.getStartTime())) {
+                return -1;
+            } else if (task1.getStartTime().isEqual(task2.getStartTime())) {
+                return 0;
+            } else {
+                return 1;
+            }
+        });
 
         try (BufferedReader tasksFileBufferedReader = new BufferedReader(new FileReader(file))) {
             tasksFileBufferedReader.readLine();
@@ -108,9 +122,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
                 String[] elements = tasksFileCurrentString.split(",");
                 if (elements[1].equals(TaskTypes.TASK.toString())) {
                     backedTasksMap.put(Integer.parseInt(elements[0]), fromString(tasksFileCurrentString));
+                    if (fromString(tasksFileCurrentString).getStartTime() != null) {
+                        backedPrioritizedTasks.add(fromString(tasksFileCurrentString));
+                    }
                 } else if (elements[1].equals(TaskTypes.EPIC.toString())) {
                     if (fromString(tasksFileCurrentString) instanceof Epic) {
                         backedEpicsMap.put(Integer.parseInt(elements[0]), (Epic) fromString(tasksFileCurrentString));
+                    }
+                    if (fromString(tasksFileCurrentString).getStartTime() != null) {
+                        backedPrioritizedTasks.add(fromString(tasksFileCurrentString));
                     }
                 } else if (elements[1].equals(TaskTypes.SUBTASK.toString())) {
                     if (fromString(tasksFileCurrentString) instanceof Subtask) {
@@ -119,28 +139,61 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
                         epic.addSubtask(subtask.getId());
                         backedSubtasksMap.put(Integer.parseInt(elements[0]), subtask);
                     }
+                    if (fromString(tasksFileCurrentString).getStartTime() != null) {
+                        backedPrioritizedTasks.add(fromString(tasksFileCurrentString));
+                    }
+                }
+                for (Subtask subtask : backedSubtasksMap.values()) {
+                    if (subtask.getStartTime() != null) {
+                        Epic epic = backedEpicsMap.get(subtask.getEpicID());
+                        for (Task task : backedPrioritizedTasks) {
+                            if (task instanceof Subtask && ((Subtask) task).getEpicID() == epic.getId()) {
+                                epic.setStartTime(task.getStartTime());
+                                break;
+                            }
+                        }
+                        long subtasksDurationsSum = 0;
+                        for (Task task : backedPrioritizedTasks) {
+                            if (task instanceof Subtask && ((Subtask) task).getEpicID() == epic.getId()) {
+                                subtasksDurationsSum += ((Subtask) task).getDurationOfSubtask().toMinutes();
+                            }
+                        }
+                        epic.setEpicDuration(subtasksDurationsSum);
+                    }
                 }
             }
         }
-        return new FileBackedTaskManager(backedTasksMap, backedEpicsMap, backedSubtasksMap);
+        String fileAsString = file.toString();
+        return new FileBackedTaskManager(backedTasksMap, backedEpicsMap, backedSubtasksMap, backedPrioritizedTasks,
+                fileAsString);
     }
 
     public static Task fromString(String value) {
         String[] elements = value.split(",");
         if (elements[1].equals(TaskTypes.TASK.toString())) {
-            return new Task(elements[2], elements[4], Integer.parseInt(elements[0]), Status.valueOf(elements[3]));
+            if (elements[6].equals("null")) {
+                return new Task(elements[2], elements[4], Integer.parseInt(elements[0]), Status.valueOf(elements[3]));
+            } else {
+                return new Task(elements[2], elements[4], Integer.parseInt(elements[0]), Status.valueOf(elements[3]),
+                        elements[6], elements[7]);
+            }
         } else if (elements[1].equals(TaskTypes.EPIC.toString())) {
             return new Epic(elements[2], elements[4], Integer.parseInt(elements[0]), Status.valueOf(elements[3]));
         } else if (elements[1].equals(TaskTypes.SUBTASK.toString())) {
-            return new Subtask(Integer.parseInt(elements[5]), elements[2], elements[4], Integer.parseInt(elements[0]),
-                    Status.valueOf(elements[3]));
+            if (elements[6].equals("null")) {
+                return new Subtask(Integer.parseInt(elements[5]), elements[2], elements[4],
+                        Integer.parseInt(elements[0]), Status.valueOf(elements[3]));
+            } else {
+                return new Subtask(Integer.parseInt(elements[5]), elements[2], elements[4],
+                        Integer.parseInt(elements[0]), Status.valueOf(elements[3]), elements[6], elements[7]);
+            }
         }
         return null;
     }
 
     public void save() {
         try (Writer tasksFileWriter = new FileWriter(savedTasksFilePath)) {
-            tasksFileWriter.write("id,type,name,status,description,epic\n");
+            tasksFileWriter.write("id,type,name,status,description,epic,duration,startTime\n");
             writeElementsInFile(tasks, tasksFileWriter);
             writeElementsInFile(epics, tasksFileWriter);
             writeElementsInFile(subtasks, tasksFileWriter);

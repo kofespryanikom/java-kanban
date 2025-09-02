@@ -179,7 +179,7 @@ class ManagersTest {
 
         backedTaskManager.save();
 
-        Assertions.assertEquals("id,type,name,status,description,epic\n",
+        Assertions.assertEquals("id,type,name,status,description,epic,duration,startTime\n",
                 Files.readString(backingFile.toPath()));
     }
 
@@ -187,7 +187,7 @@ class ManagersTest {
     public void backedTaskManagerShouldRecoverNoTasksFromBlankFile() throws IOException {
         File backingFile = File.createTempFile("saved_tasks", ".csv");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
-            bufferedWriter.write("id,type,name,status,description,epic\n");
+            bufferedWriter.write("id,type,name,status,description,epic,duration,startTime\n");
         }
         FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
         List<Task> recoveredTaskList = recoveredBackedTaskManager.returnTasksList();
@@ -211,7 +211,7 @@ class ManagersTest {
                 "Description1", Status.NEW));
         backedTaskManager.save();
 
-        Assertions.assertEquals("id,type,name,status,description,epic\n"
+        Assertions.assertEquals("id,type,name,status,description,epic,duration,startTime\n"
                 + backedTaskManager.returnTaskByID(0).toString() + "\n"
                 + backedTaskManager.returnEpicByID(1).toString() + "\n"
                 + backedTaskManager.returnSubtaskByID(2).toString() + "\n", Files.readString(backingFile.toPath()));
@@ -221,19 +221,35 @@ class ManagersTest {
     public void backedTaskManagerShouldRecoverTasksFromFile() throws IOException {
         File backingFile = File.createTempFile("saved_tasks", ".csv");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
-            bufferedWriter.write("id,type,name,status,description,epic\n" +
-                    "0,TASK,0,NEW,0\n" +
-                    "1,EPIC,1,DONE,1\n" +
-                    "2,SUBTASK,2,DONE,2,1\n");
+            bufferedWriter.write("id,type,name,status,description,epic,duration,startTime\n" +
+                    "0,TASK,0,NEW,0,null,1000,23:14 05.12.1999\n" +
+                    "1,EPIC,1,DONE,1,null,null,null\n" +
+                    "2,SUBTASK,2,DONE,2,1,null,null\n");
         }
         FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
         List<Task> recoveredTaskList = recoveredBackedTaskManager.returnTasksList();
         List<Epic> recoveredEpicList = recoveredBackedTaskManager.returnEpicsList();
         List<Subtask> recoveredSubtaskList = recoveredBackedTaskManager.returnSubtasksList();
 
-        Assertions.assertEquals("[0,TASK,0,NEW,0]", recoveredTaskList.toString());
-        Assertions.assertEquals("[1,EPIC,1,DONE,1]", recoveredEpicList.toString());
-        Assertions.assertEquals("[2,SUBTASK,2,DONE,2,1]", recoveredSubtaskList.toString());
+        Assertions.assertEquals("[0,TASK,0,NEW,0,null,1000,23:14 05.12.1999]", recoveredTaskList.toString());
+        Assertions.assertEquals("[1,EPIC,1,DONE,1,null,null,null]", recoveredEpicList.toString());
+        Assertions.assertEquals("[2,SUBTASK,2,DONE,2,1,null,null]", recoveredSubtaskList.toString());
+    }
+
+    @Test
+    public void backedTaskManagerShouldRecoverEpicsAndSubtasksFromFile() throws IOException {
+        File backingFile = File.createTempFile("saved_tasks", ".csv");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
+            bufferedWriter.write("id,type,name,status,description,epic,duration,startTime\n" +
+                    "1,EPIC,1,DONE,1,null,1000,23:14 05.12.1999\n" +
+                    "2,SUBTASK,2,DONE,2,1,1000,23:14 05.12.1999\n");
+        }
+        FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
+        List<Epic> recoveredEpicList = recoveredBackedTaskManager.returnEpicsList();
+        List<Subtask> recoveredSubtaskList = recoveredBackedTaskManager.returnSubtasksList();
+
+        Assertions.assertEquals("[1,EPIC,1,DONE,1,null,1000,23:14 05.12.1999]", recoveredEpicList.toString());
+        Assertions.assertEquals("[2,SUBTASK,2,DONE,2,1,1000,23:14 05.12.1999]", recoveredSubtaskList.toString());
     }
 
     @Test
@@ -241,9 +257,9 @@ class ManagersTest {
         File backingFile = File.createTempFile("saved_tasks", ".csv");
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(backingFile))) {
             bufferedWriter.write("id,type,name,status,description,epic\n" +
-                    "1,EPIC,1,DONE,1\n" +
-                    "2,SUBTASK,2,DONE,2,1\n" +
-                    "3,SUBTASK,3,DONE,3,1\n");
+                    "1,EPIC,1,DONE,1,null,null,null\n" +
+                    "2,SUBTASK,2,DONE,2,1,null,null,null\n" +
+                    "3,SUBTASK,3,DONE,3,1,null,null,null\n");
         }
         FileBackedTaskManager recoveredBackedTaskManager = Managers.getRecoveredBackedManager(backingFile.toString());
         Epic recoveredEpic = recoveredBackedTaskManager.returnEpicByID(1);
