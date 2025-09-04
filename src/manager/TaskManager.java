@@ -14,11 +14,11 @@ public interface TaskManager {
 
     int getEpicIdBySubtaskId(int subtaskID);
 
-    ArrayList<Task> returnTasksList();
+    List<Task> returnTasksList();
 
-    ArrayList<Epic> returnEpicsList();
+    List<Epic> returnEpicsList();
 
-    ArrayList<Subtask> returnSubtasksList();
+    List<Subtask> returnSubtasksList();
 
     void deleteAllTasks();
 

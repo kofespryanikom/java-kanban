@@ -8,6 +8,7 @@ import model.Task;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -41,30 +42,18 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> returnTasksList() {
-        ArrayList<Task> tasksList = new ArrayList<>();
-        for (Task task : tasks.values()) {
-            tasksList.add(task);
-        }
-        return tasksList;
+    public List<Task> returnTasksList() {
+        return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Epic> returnEpicsList() {
-        ArrayList<Epic> epicsList = new ArrayList<>();
-        for (Epic epic : epics.values()) {
-            epicsList.add(epic);
-        }
-        return epicsList;
+    public List<Epic> returnEpicsList() {
+        return new ArrayList<>(epics.values());
     }
 
     @Override
-    public ArrayList<Subtask> returnSubtasksList() {
-        ArrayList<Subtask> subtasksList = new ArrayList<>();
-        for (Subtask subtask : subtasks.values()) {
-            subtasksList.add(subtask);
-        }
-        return subtasksList;
+    public List<Subtask> returnSubtasksList() {
+        return new ArrayList<>(subtasks.values());
     }
 
     @Override
@@ -258,6 +247,8 @@ public class InMemoryTaskManager implements TaskManager {
                 }
                 epic.setEpicDuration(subtasksDurationsSum);
             }
+        } else {
+            System.out.println("Подзадача не была обновлена, потому что пересекается с другими подзадачами!");
         }
     }
 
@@ -316,10 +307,11 @@ public class InMemoryTaskManager implements TaskManager {
     public Status checkStatus(int epicID) {
         int newTasksCounter = 0;
         int doneTasksCounter = 0;
+        int subtasksCountInEpic = 0;
         for (Subtask subtaskCheck : subtasks.values()) {
 
             if (subtaskCheck.getEpicID() == epicID) {
-
+                subtasksCountInEpic++;
                 if (subtaskCheck.getStatus().equals(Status.NEW)) {
                     newTasksCounter++;
                 } else if (subtaskCheck.getStatus().equals(Status.DONE)) {
@@ -329,9 +321,9 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         }
-        if (newTasksCounter == subtasks.size()) {
+        if (newTasksCounter == subtasksCountInEpic) {
             return Status.NEW;
-        } else if (doneTasksCounter == subtasks.size()) {
+        } else if (doneTasksCounter == subtasksCountInEpic) {
             return Status.DONE;
         } else {
             return Status.IN_PROGRESS;
@@ -447,6 +439,7 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean hasAnyDateIntersection(Task task) {
         if (task.getStartTime() != null) {
             return prioritizedTasks.stream()
+                    .filter(element -> element.getId() != task.getId())
                     .anyMatch(element -> areDatesIntersecting(task, element));
         } else {
             return false;
