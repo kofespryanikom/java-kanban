@@ -115,7 +115,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     }
 
     @Test
-    public void testException(){
+    public void testManagerSaveException(){
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager("C::/file.csv");
         assertThrows(ManagerSaveException.class, fileBackedTaskManager::save,
                 "Вызов метода save() может привести к исключению");

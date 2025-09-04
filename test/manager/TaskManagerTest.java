@@ -123,6 +123,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    public void taskManagerShouldReturnCorrectPrioritizedTaskList() {
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                Status.NEW, "5", "23:00 01.01.2000"));
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                Status.NEW, "10", "23:30 01.01.2000"));
+        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                Status.NEW, "30", "21:09 01.01.2000"));
+        Assertions.assertEquals("[2,TASK,0,NEW,0,null,30,21:09 01.01.2000, " +
+                "0,TASK,0,NEW,0,null,5,23:00 01.01.2000, 1,TASK,0,NEW,0,null,10,23:30 01.01.2000]",
+                inMemoryTaskManager.getPrioritizedTasks().toString());
+    }
+
+    @Test
     public void calculationOfStatusOfEpicShouldBeRightWithBoundaryConditions() {
         inMemoryTaskManager.createEpic(inMemoryTaskManager.formulateEpicForCreation("Epic1", "Description1"));
         inMemoryTaskManager.createSubtask(inMemoryTaskManager.formulateSubtaskForCreation(0,"Subtask1",
