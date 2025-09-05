@@ -6,7 +6,6 @@ import model.Subtask;
 import model.Task;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -43,6 +42,9 @@ public class Main {
                     getHistory();
                     break;
                 case "7":
+                    getPrioritizedTasks();
+                    break;
+                case "8":
                     return;
                 default:
                     System.out.println("Такой команды нет!");
@@ -84,7 +86,8 @@ public class Main {
         System.out.println("4 - Получить задачу/эпик/подзадачу по ID");
         System.out.println("5 - Обновить задачу/эпик/подзадачу по ID");
         System.out.println("6 - Получить историю просмотра задач");
-        System.out.println("7 - Выход");
+        System.out.println("7 - Получить список задач в порядке приоритета");
+        System.out.println("8 - Выход");
     }
 
     public static void createTasks() {
@@ -95,6 +98,10 @@ public class Main {
         String command = scanner.nextLine();
         switch (command) {
             case "1":
+                System.out.println("Имеет ли эта задача дату начала выполнения и продолжительность?");
+                System.out.println("1 - имеет");
+                System.out.println("2 - не имеет");
+                command = scanner.nextLine();
                 System.out.println("Введите название задачи:");
                 String nameOfTask = scanner.nextLine();
                 System.out.println("Введите описание задачи:");
@@ -104,9 +111,24 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                Task task = taskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask,
-                        Status.valueOf(statusOfTask));
-                taskManager.createTask(task);
+                switch (command) {
+                    case "1":
+                        System.out.println("Введите длительность задачи в минутах");
+                        String taskDuration = scanner.nextLine();
+                        System.out.println("Введите время и дату начала выполнения в формате \"HH:mm dd.MM.yyyy\"");
+                        String dateTimeOfTask = scanner.nextLine();
+                        Task taskWithDate = taskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask,
+                                Status.valueOf(statusOfTask), taskDuration, dateTimeOfTask);
+                        taskManager.createTask(taskWithDate);
+                        break;
+                    case "2":
+                        Task task = taskManager.formulateTaskForCreation(nameOfTask, descriptionOfTask,
+                                Status.valueOf(statusOfTask));
+                        taskManager.createTask(task);
+                        break;
+                    default:
+                        System.out.println("Такой команды нет!");
+                }
                 break;
             case "2":
                 System.out.println("Введите название эпика:");
@@ -117,6 +139,10 @@ public class Main {
                 taskManager.createEpic(epic);
                 break;
             case "3":
+                System.out.println("Имеет ли эта подзадача дату начала выполнения и продолжительность?");
+                System.out.println("1 - имеет");
+                System.out.println("2 - не имеет");
+                command = scanner.nextLine();
                 System.out.println("Введите ID эпика, к которому относится подзадача");
                 int subtaskID = scanner.nextInt();
                 scanner.nextLine();
@@ -129,9 +155,25 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                Subtask subtask = taskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask,
-                        descriptionOfSubtask, Status.valueOf(statusOfSubtask));
-                taskManager.createSubtask(subtask);
+                switch (command) {
+                    case "1":
+                        System.out.println("Введите длительность подзадачи в минутах");
+                        String subtaskDuration = scanner.nextLine();
+                        System.out.println("Введите время и дату начала выполнения в формате \"HH:mm dd.MM.yyyy\"");
+                        String dateTimeOfSubtask = scanner.nextLine();
+                        Subtask subtaskWithDate = taskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask,
+                                descriptionOfSubtask, Status.valueOf(statusOfSubtask), subtaskDuration,
+                                dateTimeOfSubtask);
+                        taskManager.createSubtask(subtaskWithDate);
+                        break;
+                    case "2":
+                        Subtask subtask = taskManager.formulateSubtaskForCreation(subtaskID, nameOfSubtask,
+                                descriptionOfSubtask, Status.valueOf(statusOfSubtask));
+                        taskManager.createSubtask(subtask);
+                        break;
+                    default:
+                        System.out.println("Такой команды нет!");
+                }
                 break;
             default:
                 System.out.println("Такого типа задачи нет!");
@@ -146,15 +188,15 @@ public class Main {
         String command = scanner.nextLine();
         switch (command) {
             case "1":
-                ArrayList<Task> taskList = taskManager.returnTasksList();
+                List<Task> taskList = taskManager.returnTasksList();
                 System.out.println(taskList);
                 break;
             case "2":
-                ArrayList<Epic> epicList = taskManager.returnEpicsList();
+                List<Epic> epicList = taskManager.returnEpicsList();
                 System.out.println(epicList);
                 break;
             case "3":
-                ArrayList<Subtask> subtaskList = taskManager.returnSubtasksList();
+                List<Subtask> subtaskList = taskManager.returnSubtasksList();
                 System.out.println(subtaskList);
                 break;
             default:
@@ -271,6 +313,10 @@ public class Main {
         String command = scanner.nextLine();
         switch (command) {
             case "1":
+                System.out.println("Будет ли теперь задача иметь время и срок выполнения?");
+                System.out.println("1 - да");
+                System.out.println("2 - нет");
+                command = scanner.nextLine();
                 System.out.println("Введите название задачи:");
                 String nameOfTask = scanner.nextLine();
                 System.out.println("Введите описание задачи:");
@@ -283,8 +329,20 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfTask = scanner.nextLine();
-                taskManager.renewTask(new Task(nameOfTask, descriptionOfTask, taskID,
-                        Status.valueOf(statusOfTask)));
+                switch (command) {
+                    case "1":
+                        System.out.println("Введите длительность задачи в минутах");
+                        String taskDuration = scanner.nextLine();
+                        System.out.println("Введите время и дату начала выполнения в формате \"HH:mm dd.MM.yyyy\"");
+                        String dateTimeOfTask = scanner.nextLine();
+                        taskManager.renewTask(new Task(nameOfTask, descriptionOfTask, taskID,
+                                Status.valueOf(statusOfTask), taskDuration, dateTimeOfTask));
+                        break;
+                    case "2":
+                        taskManager.renewTask(new Task(nameOfTask, descriptionOfTask, taskID,
+                                Status.valueOf(statusOfTask)));
+                        break;
+                }
                 break;
             case "2":
                 System.out.println("Введите название эпика:");
@@ -297,6 +355,10 @@ public class Main {
                 taskManager.renewEpic(new Epic(nameOfEpic, descriptionOfEpic, epicID));
                 break;
             case "3":
+                System.out.println("Будет ли теперь задача иметь время и срок выполнения?");
+                System.out.println("1 - да");
+                System.out.println("2 - нет");
+                command = scanner.nextLine();
                 System.out.println("Введите название подзадачи:");
                 String nameOfSubtask = scanner.nextLine();
                 System.out.println("Введите описание подзадачи:");
@@ -309,8 +371,21 @@ public class Main {
                 System.out.println("- IN_PROGRESS");
                 System.out.println("- DONE");
                 String statusOfSubtask = scanner.nextLine();
-                taskManager.renewSubtask(new Subtask(taskManager.getEpicIdBySubtaskId(subtaskID),
-                        nameOfSubtask, descriptionOfSubtask, subtaskID, Status.valueOf(statusOfSubtask)));
+                switch (command) {
+                    case "1":
+                        System.out.println("Введите длительность подзадачи в минутах");
+                        String subtaskDuration = scanner.nextLine();
+                        System.out.println("Введите время и дату начала выполнения в формате \"HH:mm dd.MM.yyyy\"");
+                        String dateTimeOfSubtask = scanner.nextLine();
+                        taskManager.renewSubtask(new Subtask(taskManager.getEpicIdBySubtaskId(subtaskID),
+                                nameOfSubtask, descriptionOfSubtask, subtaskID, Status.valueOf(statusOfSubtask),
+                                subtaskDuration, dateTimeOfSubtask));
+                        break;
+                    case "2":
+                        taskManager.renewSubtask(new Subtask(taskManager.getEpicIdBySubtaskId(subtaskID),
+                                nameOfSubtask, descriptionOfSubtask, subtaskID, Status.valueOf(statusOfSubtask)));
+                        break;
+                }
                 break;
             default:
                 System.out.println("Такого типа задачи нет!");
@@ -320,5 +395,9 @@ public class Main {
     public static void getHistory() {
         List<Task> history = taskManager.getHistory();
         System.out.println(history);
+    }
+
+    public static void getPrioritizedTasks() {
+        System.out.println(taskManager.getPrioritizedTasks());
     }
 }

@@ -4,8 +4,8 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public interface TaskManager {
 
@@ -13,11 +13,11 @@ public interface TaskManager {
 
     int getEpicIdBySubtaskId(int subtaskID);
 
-    ArrayList<Task> returnTasksList();
+    List<Task> returnTasksList();
 
-    ArrayList<Epic> returnEpicsList();
+    List<Epic> returnEpicsList();
 
-    ArrayList<Subtask> returnSubtasksList();
+    List<Subtask> returnSubtasksList();
 
     void deleteAllTasks();
 
@@ -51,6 +51,14 @@ public interface TaskManager {
 
     Status checkStatus(int epicID);
 
+    void deleteAllTasksFromHistory();
+
+    void deleteAllEpicsFromHistory();
+
+    void deleteAllSubtasksFromHistory();
+
+    void deleteAllSubtasksOfEpicFromHistory(Epic epic);
+
     List<Task> getHistory();
 
     Task formulateTaskForCreation(String name, String description, Status status);
@@ -58,4 +66,15 @@ public interface TaskManager {
     Epic formulateEpicForCreation(String name, String description);
 
     Subtask formulateSubtaskForCreation(int epicID, String name, String description, Status status);
+
+    Task formulateTaskForCreation(String name, String description, Status status, String duration, String startTime);
+
+    Subtask formulateSubtaskForCreation(int epicID, String name, String description, Status status, String duration,
+                                        String startTime);
+
+    boolean areDatesIntersecting(Task task1, Task task2);
+
+    boolean hasAnyDateIntersection(Task task);
+
+    TreeSet<Task> getPrioritizedTasks();
 }
