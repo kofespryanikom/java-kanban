@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 public interface TaskManager {
@@ -77,4 +78,6 @@ public interface TaskManager {
     boolean hasAnyDateIntersection(Task task);
 
     TreeSet<Task> getPrioritizedTasks();
+
+    Map<Integer, Subtask> getSubtasksMap();
 }
