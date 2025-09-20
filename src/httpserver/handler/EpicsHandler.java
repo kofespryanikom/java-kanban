@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class EpicsHandler extends BaseHttpHandler {
 
-    TaskManager taskManager;
+    private TaskManager taskManager;
 
     public EpicsHandler(TaskManager taskManager) {
         this.taskManager = taskManager;

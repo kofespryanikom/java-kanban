@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class PrioritizedHandler extends BaseHttpHandler {
-    TaskManager taskManager;
+    private TaskManager taskManager;
 
     public PrioritizedHandler(TaskManager taskManager) {
         this.taskManager = taskManager;

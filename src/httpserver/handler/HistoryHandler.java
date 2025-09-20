@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 public class HistoryHandler extends BaseHttpHandler {
 
-    TaskManager taskManager;
+    private TaskManager taskManager;
 
     public HistoryHandler(TaskManager taskManager) {
         this.taskManager = taskManager;

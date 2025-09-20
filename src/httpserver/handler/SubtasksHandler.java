@@ -19,7 +19,7 @@ import java.util.List;
 
 public class SubtasksHandler extends BaseHttpHandler {
 
-    TaskManager taskManager;
+    private TaskManager taskManager;
 
     public SubtasksHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
