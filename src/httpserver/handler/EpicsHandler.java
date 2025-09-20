@@ -65,7 +65,7 @@ public class EpicsHandler extends BaseHttpHandler {
                             epicAsJsonObject.get("id").getAsInt()));
                 } else {
                     taskManager.createEpic(taskManager.formulateEpicForCreation(epicAsJsonObject.get("name")
-                            .getAsString(),
+                                    .getAsString(),
                             epicAsJsonObject.get("description").getAsString()
                     ));
                 }
@@ -127,6 +127,8 @@ public class EpicsHandler extends BaseHttpHandler {
                             return;
                         }
                         sendText(httpExchange, "OK");
+                    } catch (NotFoundException e) {
+                        sendNotFound(httpExchange);
                     } catch (NumberFormatException e) {
                         sendInternalError(httpExchange);
                     }

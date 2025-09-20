@@ -92,12 +92,6 @@ public class SubtasksHandler extends BaseHttpHandler {
                     }
                 } else {
                     if (subtaskAsJsonObject.has("startTime")) {
-                        System.out.println(subtaskAsJsonObject.get("epicID").getAsInt());
-                        System.out.println(subtaskAsJsonObject.get("name").getAsString());
-                        System.out.println(subtaskAsJsonObject.get("description").getAsString());
-                        System.out.println(subtaskAsJsonObject.get("status").getAsString());
-                        System.out.println(subtaskAsJsonObject.get("durationOfSubtask").getAsString());
-                        System.out.println(subtaskAsJsonObject.get("startTime").getAsString());
                         try {
                             taskManager.createSubtask(taskManager.formulateSubtaskForCreation(subtaskAsJsonObject
                                             .get("epicID").getAsInt(),
