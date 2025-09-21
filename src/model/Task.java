@@ -14,10 +14,10 @@ public class Task {
     protected String name;
     protected String description;
     protected Status status;
-    protected TaskTypes className;
+    protected TaskTypes className = null;
     private Duration durationOfTask = null;
     protected LocalDateTime startTime = null;
-    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+    protected final transient DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
 
     public Task(String name, String description, int id, Status status, String duration, String startTime) {
         this.name = name;

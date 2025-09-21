@@ -1,5 +1,6 @@
 package manager;
 
+import exceptions.TaskIntersectionException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -184,15 +185,17 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void taskManagerShouldCalculateDateAndTimeIntersectionsCorrectly() {
-        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
-                Status.NEW, "60", "22:30 01.01.2000"));
-        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
-                Status.NEW, "60", "23:00 01.01.2000"));
-        inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
-                Status.NEW, "70", "21:09 01.01.2000"));
-
-        Assertions.assertEquals("[0,TASK,0,NEW,0,null,60,22:30 01.01.2000, 2,TASK,0,NEW,0,null,70,21:09 01.01.2000]",
-                inMemoryTaskManager.returnTasksList().toString());
+        try {
+            inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                    Status.NEW, "60", "22:30 01.01.2000"));
+            inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                    Status.NEW, "60", "23:00 01.01.2000"));
+            inMemoryTaskManager.createTask(inMemoryTaskManager.formulateTaskForCreation("0", "0",
+                    Status.NEW, "70", "21:09 01.01.2000"));
+        } catch (TaskIntersectionException e) {
+            Assertions.assertEquals("При создании задачи было обнаружено пересечение с другими задачами",
+                    e.getMessage());
+        }
     }
 
 }

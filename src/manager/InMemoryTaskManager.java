@@ -1,6 +1,8 @@
 package manager;
 
 import datastructures.Node;
+import exceptions.NotFoundException;
+import exceptions.TaskIntersectionException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -101,18 +103,27 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task returnTaskByID(int id) {
+        if (tasks.get(id) == null) {
+            throw new NotFoundException("Задачи с таким ID нет");
+        }
         inMemoryHistoryManager.add(tasks.get(id));
         return tasks.get(id);
     }
 
     @Override
     public Epic returnEpicByID(int id) {
+        if (epics.get(id) == null) {
+            throw new NotFoundException("Эпика с таким ID нет");
+        }
         inMemoryHistoryManager.add(epics.get(id));
         return epics.get(id);
     }
 
     @Override
     public Subtask returnSubtaskByID(int id) {
+        if (subtasks.get(id) == null) {
+            throw new NotFoundException("Подзадачи с таким ID нет");
+        }
         inMemoryHistoryManager.add(subtasks.get(id));
         return subtasks.get(id);
     }
@@ -126,6 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } else {
             System.out.println("Задача не была создана, потому что пересекается с другими задачами!");
+            throw new TaskIntersectionException("При создании задачи было обнаружено пересечение с другими задачами");
         }
     }
 
@@ -138,6 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } else {
             System.out.println("Задача не была создана, потому что пересекается с другими задачами!");
+            throw new TaskIntersectionException("При создании эпика было обнаружено пересечение с другими задачами");
         }
     }
 
@@ -170,6 +183,8 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(checkStatus(subtask.getEpicID()));
         } else {
             System.out.println("Задача не была создана, потому что пересекается с другими задачами!");
+            throw new TaskIntersectionException("При создании подзадачи было обнаружено пересечение с другими " +
+                    "задачами");
         }
     }
 
@@ -191,6 +206,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } else {
             System.out.println("Задача не была обновлена, потому что пересекается с другими задачами!");
+            throw new TaskIntersectionException("При создании задачи было обнаружено пересечение с другими " +
+                    "задачами");
         }
 
     }
@@ -246,6 +263,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } else {
             System.out.println("Подзадача не была обновлена, потому что пересекается с другими подзадачами!");
+            throw new TaskIntersectionException("При создании подзадачи было обнаружено пересечение с другими " +
+                    "задачами");
         }
     }
 
@@ -441,5 +460,10 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public Map<Integer, Subtask> getSubtasksMap() {
+        return subtasks;
     }
 }

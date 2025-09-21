@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class Subtask extends Task {
 
-    private final int epicID;
+    private int epicID;
     private Duration durationOfSubtask = null;
 
     public Subtask(int epicID, String name, String description, int id, Status status, String duration,
